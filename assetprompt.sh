@@ -1,19 +1,18 @@
 #!/bin/sh
 
-
 #  assetprompt.sh
 #  
 #
 #  Created by Sean Pascual on 14/09/2017.
 #
 
-MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-pashLoc="Pashua.app"
+#MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+MYDIR="/Users/Shared/JSS_Temp/"
+pashLoc="/Users/Shared/JSS_Temp/Pashua.app"
 
 ###########################################################################
 # SHORTCUTS
 ######################################################################
-#cdPath="cocoaDialog.app/Contents/MacOS/cocoaDialog"
 source "$MYDIR/pashua.sh"
 
 
