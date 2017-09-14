@@ -1,57 +1,33 @@
 #!/bin/sh
 
-#  assetprompt.sh
-#  
+#  Name Computer.sh
+#
 #
 #  Created by Sean Pascual on 14/09/2017.
 #
 
-#MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MYDIR="/Users/Shared/JSS_Temp/"
-pashLoc="/Users/Shared/JSS_Temp/Pashua.app"
+REPEAT=true
+while ${REPEAT}; do
 
-###########################################################################
-# SHORTCUTS
-######################################################################
-source "$MYDIR/pashua.sh"
+    COMPNAME="$(osascript -e 'display dialog "Enter asset tag 4 digit number" with icon caution default answer "" buttons{"Continue"} default button "Continue"')"
 
 
-##########################
-# Create the GUI
-conf="
-# Set window title
-*.title = macOS Config Tool
+    COMPNAME="$(echo $COMPNAME | cut -c 41-44)"
 
-# Get the icon from the application bundle
-img.type = image
-img.tooltip = This is an element of type “image”
-img.path = "$MYDIR/beamly-logo-pink.png"
-
-# Introductory text
-txt.type = text
-txt.default = To setup this computer, please enter the following information.
-txt.width = 310
-
-# Add a text field
-compname.type = textfield
-compname.label = 4 digit asset tag [from the bottom of the computer]
-compname.width = 100
-
-db.type = defaultbutton
-"
-
-pashua_run "$conf" "$pashLoc"
+    COMPNAME="Beamly-$COMPNAME"
 
 
-##########################
-# Prompt for the name of the computer and name it
-compname = "Beamly-$compname"
+    osascript -e "display notification \"$COMPNAME\""
 
-scutil --set ComputerName $compname
-scutil --set HostName $compname
-scutil --set LocalHostName $compname
+    DISPLAYNAME="Are you sure you want to name this computer: $COMPNAME"
 
+    CONFIRM=$(osascript -e "display dialog \"${DISPLAYNAME}\" buttons {\"Yes\", \"No\"} default button \"No\"")
 
-##########################
-# Tell user that the installation is complete
-exit 0
+    if [[ "${CONFIRM}" == "button returned:Yes" ]]; then
+        echo "Setting name to ${COMPNAME}"
+        scutil --set ComputerName $COMPNAME
+        scutil --set HostName $COMPNAME
+        scutil --set LocalHostName $COMPNAME
+        REPEAT=false
+    fi
+done
