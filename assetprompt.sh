@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 #  assetprompt.sh
 #  
 #
@@ -39,7 +40,6 @@ compname.width = 100
 
 db.type = defaultbutton
 "
-
 
 pashua_run "$conf" "$pashLoc"
 
