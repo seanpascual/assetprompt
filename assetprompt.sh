@@ -13,11 +13,8 @@ while ${REPEAT}; do
 
 
     COMPNAME="$(echo $COMPNAME | cut -c 41-44)"
-
+    ASSETTAG="${COMPNAME}"
     COMPNAME="Beamly-$COMPNAME"
-
-
-    osascript -e "display notification \"$COMPNAME\""
 
     DISPLAYNAME="Are you sure you want to name this computer: $COMPNAME"
 
@@ -25,6 +22,7 @@ while ${REPEAT}; do
 
     if [[ "${CONFIRM}" == "button returned:Yes" ]]; then
         echo "Setting name to ${COMPNAME}"
+        jamf recon -verbose -assetTag "${ASSETTAG}"
         scutil --set ComputerName $COMPNAME
         scutil --set HostName $COMPNAME
         scutil --set LocalHostName $COMPNAME
