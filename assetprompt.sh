@@ -33,10 +33,18 @@ fi
 done
 
 # SET FULL NAME OF USER OF COMPUTER
+FULLNAME=""
+while [ "${FULLNAME}" == "" ]; do
 FULLNAME="$(osascript -e 'display dialog "Enter the first name and surname of the user of this computer" default answer "" buttons{"Continue"} default button "Continue"')"
+FULLNAME="$(echo ${FULLNAME} | cut -c 41)"
+done
 
 # SET EMAIL ADDRESS OF USER OF COMPUTER
+EMAIL=""
+while [ "${EMAIL}" == "" ]; do
 EMAIL="$(osascript -e 'display dialog "Enter the email address of the user of this computer" default answer "" buttons{"Continue"} default button "Continue"')"
+EMAIL="$(echo ${EMAIL} | cut -c 41)"
+done
 
 #echo "Setting name to ${COMPNAME}"
 scutil --set ComputerName $COMPNAME
