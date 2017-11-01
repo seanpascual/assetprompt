@@ -4,7 +4,7 @@
 #
 #
 #  Created by Sean Pascual on 14/09/2017.
-#  Modified by Sean Pascual on 30/10/2017.
+#  Modified by Sean Pascual on 01/11/2017.
 #
 
 # SET NAME OF COMPUTER
@@ -31,7 +31,7 @@ done
 # SET DEPARTMENT FOR COMPUTER
 DEPTNAME="false"
 while [ ${DEPTNAME} == "false" ]; do
-DEPTNAME="$(osascript -e 'set deptList to {"IT", "Engineering"}' -e 'choose from list deptList with prompt "Select the department this computer will belong to"')"
+DEPTNAME="$(osascript -e 'set deptList to {"Campaigns", "Consumer Experience", "Creative", "Engineering", "Marketing Science", "Operations and Management", "Product"}' -e 'choose from list deptList with prompt "Select the department this computer will belong to"')"
 done
 
 # SET FULL NAME OF USER OF COMPUTER
