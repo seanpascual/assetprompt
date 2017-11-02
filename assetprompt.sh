@@ -7,11 +7,8 @@
 #  Modified by Sean Pascual on 01/11/2017.
 #
 
-# VARIABLES OF DEPTS TO BE HIDDEN FROM USER
-DEPT1="_LOST/STOLEN"
-DEPT2="_OUTFORREPAIR"
-DEPT3="_SPARE"
-NOOFDEPTSTOREMOVE="3" #Set this to the number of departments to be hidden from the user
+# DEPARTMENTS TO BE HIDDEN FROM USER
+declare -a DEPTSTOREMOVE=('_LOST/STOLEN' '_OUTFORREPAIR' '_SPARE')
 
 # SET NAME OF COMPUTER
 REPEAT=true
@@ -40,15 +37,17 @@ DEPTNAME="false"
 ############################## CURL TEST VIA JAMF API ####################
 
 DEPTS=$(curl -H "Accept: application/json" -u sean.pascual https://beamly.tramscloud.co.uk/JSSResource/departments | sed -e 's/[{}]/''/g' |  awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep "name" | while read line; do cut -c 8- | sed 's/]//g'; done)
-COUNTER=1
-CHECK=$((${NOOFDEPTSTOREMOVE}+1))
-DEPTCOUNTER="DEPT${COUNTER}"
-
-while [${COUNTER} -lt ${CHECK}]; do
-DEPTS=$(sed -i '' '${!DEPTCOUNTER}/d')
-COUNTER=$((${COUNTER}+1))
-CHECK=$((${CHECK}+1))
+for i in ${DEPTSTOREMOVE[@]}; do
+DEPTS=$(echo "${DEPTS}" | grep -v '^\"${i}')
 done
+#COUNTER=1
+#CHECK=$((${NOOFDEPTSTOREMOVE}+1))
+#DEPTCOUNTER="DEPT${COUNTER}"
+#while [${COUNTER} -lt ${CHECK}]; do
+#DEPTS=$(sed -i '' '${!DEPTCOUNTER}/d')
+#COUNTER=$((${COUNTER}+1))
+#CHECK=$((${CHECK}+1))
+#done
 
 
 ##########################################################################
