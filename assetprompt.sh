@@ -39,7 +39,7 @@ DEPTNAME="false"
 
 ############################## CURL TEST VIA JAMF API ####################
 
-DEPTS=$(curl -H "Accept: application/json" -u sean.pascual https://beamly.tramscloud.co.uk/JSSResource/departments | sed -e 's/[{}]/''/g' |  awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep “name” | while read line; do cut -c 8- | sed ’s/]//g’; done)
+DEPTS=$(curl -H "Accept: application/json" -u sean.pascual https://beamly.tramscloud.co.uk/JSSResource/departments | sed -e 's/[{}]/''/g' |  awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep "name" | while read line; do cut -c 8- | sed 's/]//g'; done)
 COUNTER=1
 CHECK=$((${NOOFDEPTSTOREMOVE}+1))
 DEPTCOUNTER="DEPT${COUNTER}"
