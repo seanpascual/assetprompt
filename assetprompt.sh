@@ -4,11 +4,17 @@
 #
 #
 #  Created by Sean Pascual on 14/09/2017.
-#  Modified by Sean Pascual on 01/11/2017.
+#  Modified by Sean Pascual on 03/11/2017.
 #
 
-# DEPARTMENTS TO BE HIDDEN FROM USER
+# DEPARTMENTS TO BE HIDDEN FROM USER - EDIT AS NECESSARY
 declare -a DEPTSTOREMOVE=('_LOST/STOLEN' '_OUTFORREPAIR' '_SPARE')
+
+user='ls -la /dev/console | cut -d " " -f 4'
+
+USERNAME="$4"
+PASS="$7"
+JSSPATH="$8"
 
 # SET NAME OF COMPUTER
 REPEAT=true
@@ -31,31 +37,33 @@ REPEAT=false
 fi
 done
 
-# SET DEPARTMENT FOR COMPUTER
-DEPTNAME="false"
+### SET DEPARTMENT FOR COMPUTER
 
-############################## CURL TEST VIA JAMF API ####################
+# CURL DEPARTMENT LIST FROM THE JSS
+DEPTS=$(curl -H "Accept: application/json" -u $USERNAME:$PASS $JSSPATH/departments | sed -e 's/[{}]/''/g' |  awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep "name" | while read line; do cut -c 8- | sed 's/]//g'; done)
+sleep 3
 
-DEPTS=$(curl -H "Accept: application/json" -u sean.pascual https://beamly.tramscloud.co.uk/JSSResource/departments | sed -e 's/[{}]/''/g' |  awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep "name" | while read line; do cut -c 8- | sed 's/]//g'; done)
+# ITERATE THROUGH AND REMOVE DEPARTMENTS TO NOT SHOW TO USER FROM 'DEPTSTOREMOVE' VAR ABOVE
 for i in ${DEPTSTOREMOVE[@]}; do
-DEPTS=$(echo "${DEPTS}" | grep -v '^\"${i}')
+DEPTS=$(echo "${DEPTS}" | grep -v "${i}")
 done
-#COUNTER=1
-#CHECK=$((${NOOFDEPTSTOREMOVE}+1))
-#DEPTCOUNTER="DEPT${COUNTER}"
-#while [${COUNTER} -lt ${CHECK}]; do
-#DEPTS=$(sed -i '' '${!DEPTCOUNTER}/d')
-#COUNTER=$((${COUNTER}+1))
-#CHECK=$((${CHECK}+1))
+
+# CHANGE DEPT DATA TO SOMETHING APPLESCRIPT CAN READ
+DEPTS=$(echo ${DEPTS} | sed 's/" "/", "/g')
+
+#while [ ${DEPTNAME} == "false" ]; do
+#DEPTNAME="$(osascript -e 'set deptList to {${DEPTS}' -e 'choose from list deptList with prompt "Select the department this computer will belong to"')"
 #done
 
-
-##########################################################################
-
-
+# DISPLAY DIALOG TO USER TO CHOOSE THEIR DEPARTMENT
+DEPTNAME="false"
 
 while [ ${DEPTNAME} == "false" ]; do
-DEPTNAME="$(osascript -e 'set deptList to {"Campaigns", "Consumer Experience", "Creative", "Engineering", "Marketing Science", "Operations and Management", "Product"}' -e 'choose from list deptList with prompt "Select the department this computer will belong to"')"
+DEPTNAME=$(/usr/bin/osascript << EOF
+set deptList to {$DEPTS}
+choose from list deptList with prompt "Select the department this computer will belong to"
+EOF)
+echo ${DEPTNAME}
 done
 
 # SET FULL NAME OF USER OF COMPUTER
