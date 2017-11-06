@@ -6,6 +6,7 @@
 #  Created by Sean Pascual on 14/09/2017.
 #  Modified by Sean Pascual on 03/11/2017.
 #
+#
 
 # DEPARTMENTS TO BE HIDDEN FROM USER - EDIT AS NECESSARY
 declare -a DEPTSTOREMOVE=('_LOST/STOLEN' '_OUTFORREPAIR' '_SPARE')
