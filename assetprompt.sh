@@ -9,16 +9,19 @@
 #
 
 # DEPARTMENTS TO BE HIDDEN FROM USER - EDIT AS NECESSARY
-declare -a DEPTSTOREMOVE=('_LOST/STOLEN' '_OUTFORREPAIR' '_SPARE')
+declare -a DEPTSTOREMOVE=('_LOST/STOLEN' '_OUTFORREPAIR' '_SPARE' 'IT' 'Maintenance' 'Meeting Rooms' 'New York office' 'Miami Office')
 
 # LDAP USERS TO BE HIDDEN FROM USER - EDIT AS NECESSARY
 declare -a NAMESTOREMOVE=('ldapadmin')
 
-user='ls -la /dev/console | cut -d " " -f 4'
+user=$(ls -la /dev/console | cut -d " " -f 4)
+echo ${user}
 
 USERNAME="$4"
 PASS="$7"
 JSSPATH="$8"
+LDAPAUTH="$10"
+echo $LDAPAUTH
 
 ###
 ### SET NAME OF COMPUTER
@@ -60,10 +63,6 @@ done
 # CHANGE DEPT DATA TO SOMETHING APPLESCRIPT CAN READ
 DEPTS=$(echo ${DEPTS} | sed 's/" "/", "/g')
 
-#while [ ${DEPTNAME} == "false" ]; do
-#DEPTNAME="$(osascript -e 'set deptList to {${DEPTS}' -e 'choose from list deptList with prompt "Select the department this computer will belong to"')"
-#done
-
 # DISPLAY DIALOG TO USER TO CHOOSE THEIR DEPARTMENT
 DEPTNAME="false"
 
@@ -79,12 +78,12 @@ done
 ### SET FULL NAME OF USER OF COMPUTER
 ###
 
-#REPEATFULLNAME=true
-#while ${REPEATFULLNAME}; do
+REPEATFULLNAME=true
+while ${REPEATFULLNAME}; do
 
 LASTNAME="$(osascript -e 'display dialog "Enter the surname of the user of this computer" default answer "" buttons{"Continue"} default button "Continue"')"
 LASTNAME="$(echo ${LASTNAME} | cut -c 41-)"
-NAMES=$(ldapsearch -ZZ -LLL -b "dc=beamly,dc=internal" -D "uid=authenticate,ou=system,dc=beamly,dc=internal" -w $10 -H ldap://externalldap.beamly.com cn | grep -v "dn:" | grep -i "${LASTNAME}" | cut -c 5-)
+NAMES=$(ldapsearch -ZZ -LLL -b "dc=beamly,dc=internal" -D "uid=authenticate,ou=system,dc=beamly,dc=internal" -w ${LDAPAUTH} -H ldap://externalldap.beamly.com cn | grep -v "dn:" | grep -i "${LASTNAME}" | cut -c 5-)
 
 # ITERATE THROUGH AND REMOVE NAMES TO NOT SHOW TO USER FROM 'NAMESTOREMOVE' VAR ABOVE
 for z in ${NAMESTOREMOVE[@]}; do
@@ -92,15 +91,16 @@ NAMES=$(echo "${NAMES}" | grep -v "${z}")
 done
 
 # CHANGE NAME DATA TO SOMETHING APPLESCRIPT CAN READ
-NAMES=$(echo "${NAMES}" | sed -e 's/^/"/; s/$/"/; s/$/,/')
-#NAMES=$(echo ${NAMES} | sed 's/$/,/')
-NAMES=${NAMES%?}
+NAMES=$(echo "${NAMES}" | sed -e 's/^/"/; s/$/"/')
+NAMES=$(echo "${NAMES}" | sed '$!s/$/, /')
+NAMES=$(echo "${NAMES}" | tr -d '\n')
+echo "${NAMES}"
 
 # DISPLAY DIALOG TO USER TO CHOOSE THEIR NAME
 FULLNAME="false"
 
-while [[ ${FULLNAME} == "false" ]]; do
-FULLNAME=$(/usr/bin/osascript << EOF
+while [ ${FULLNAME} == "false" ]; do
+FULLNAME=$(sudo -u $user /usr/bin/osascript << EOF
 set nameList to {$NAMES}
 choose from list nameList with prompt "Select your name from below"
 EOF)
@@ -111,18 +111,12 @@ done
 DISPLAYFULLNAME="Confirm that your name is: $FULLNAME"
 
 CONFIRMFULLNAME=$(osascript -e "display dialog \"${DISPLAYFULLNAME}\" buttons {\"Yes\", \"No\"} default button \"No\"")
-
+echo $CONFIRMFULLNAME
 if [[ "${CONFIRMFULLNAME}" == "button returned:Yes" ]]; then
 REPEATFULLNAME=false
 
 fi
-#done
-
-#FULLNAME=""
-#while [ "${FULLNAME}" == "" ]; do
-#FULLNAME="$(osascript -e 'display dialog "Enter the first name and surname of the user of this computer" default answer "" buttons{"Continue"} default button "Continue"')"
-#FULLNAME="$(echo ${FULLNAME} | cut -c 41-)"
-#done
+done
 
 ###
 ### SET EMAIL ADDRESS OF USER OF COMPUTER
@@ -131,13 +125,7 @@ fi
 # CONVERT PREVIOUSLY SEARCHED NAME TO UID
 SEARCHFULLNAME=$(echo ${FULLNAME} | sed 's/[[:space:]]/./')
 
-EMAIL=$(ldapsearch -ZZ -LLL -b "dc=beamly,dc=internal" -D "uid=authenticate,ou=system,dc=beamly,dc=internal" -w $10 -H ldap://externalldap.beamly.com mail | grep -v "dn:" | grep -i "${SEARCHFULLNAME}" | cut -c 7-)
-
-#EMAIL=""
-#while [ "${EMAIL}" == "" ]; do
-#EMAIL="$(osascript -e 'display dialog "Enter the email address of the user of this computer" default answer "" buttons{"Continue"} default button "Continue"')"
-#EMAIL="$(echo ${EMAIL} | cut -c 41-)"
-#done
+EMAIL=$(ldapsearch -ZZ -LLL -b "dc=beamly,dc=internal" -D "uid=authenticate,ou=system,dc=beamly,dc=internal" -w $LDAPAUTH -H ldap://externalldap.beamly.com mail | grep -v "dn:" | grep -i "${SEARCHFULLNAME}" | cut -c 7-)
 
 #echo "Setting name to ${COMPNAME}"
 scutil --set ComputerName $COMPNAME
