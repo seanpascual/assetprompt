@@ -4,7 +4,7 @@
 #
 #
 #  Created by Sean Pascual on 14/09/2017.
-#  Modified by Sean Pascual on 07/11/2017.
+#  Modified by Sean Pascual on 08/11/2017.
 #
 #
 
@@ -20,7 +20,7 @@ echo ${user}
 USERNAME="$4"
 PASS="$7"
 JSSPATH="$8"
-LDAPAUTH="$10"
+LDAPAUTH="$6"
 echo $LDAPAUTH
 
 ###
@@ -39,7 +39,7 @@ COMPNAME="Beamly-$COMPNAME"
 
 DISPLAYNAME="Are you sure you want to name this computer: $COMPNAME"
 
-CONFIRM=$(osascript -e "display dialog \"${DISPLAYNAME}\" buttons {\"Yes\", \"No\"} default button \"No\"")
+CONFIRM=$(osascript -e "display dialog \"${DISPLAYNAME}\" buttons {\"No\", \"Yes\"} default button \"No\"")
 
 if [[ "${CONFIRM}" == "button returned:Yes" ]]; then
 REPEAT=false
@@ -83,12 +83,16 @@ while ${REPEATFULLNAME}; do
 
 LASTNAME="$(osascript -e 'display dialog "Enter the surname of the user of this computer" default answer "" buttons{"Continue"} default button "Continue"')"
 LASTNAME="$(echo ${LASTNAME} | cut -c 41-)"
-NAMES=$(ldapsearch -ZZ -LLL -b "dc=beamly,dc=internal" -D "uid=authenticate,ou=system,dc=beamly,dc=internal" -w ${LDAPAUTH} -H ldap://externalldap.beamly.com cn | grep -v "dn:" | grep -i "${LASTNAME}" | cut -c 5-)
+NAMES=$(ldapsearch -ZZ -LLL -b "dc=beamly,dc=internal" -D "uid=authenticate,ou=system,dc=beamly,dc=internal" -w $LDAPAUTH -H ldap://externalldap.beamly.com cn | grep -v "dn:" | grep -i "${LASTNAME}" | cut -c 5-)
 
 # ITERATE THROUGH AND REMOVE NAMES TO NOT SHOW TO USER FROM 'NAMESTOREMOVE' VAR ABOVE
 for z in ${NAMESTOREMOVE[@]}; do
 NAMES=$(echo "${NAMES}" | grep -v "${z}")
 done
+
+if [[ ${NAMES} == "" ]]; then
+osascript -e 'display dialog "No matching names were found.  Please try again." buttons{"OK"}'
+else
 
 # CHANGE NAME DATA TO SOMETHING APPLESCRIPT CAN READ
 NAMES=$(echo "${NAMES}" | sed -e 's/^/"/; s/$/"/')
@@ -110,11 +114,11 @@ done
 # CONFIRM USER WANTS TO USE THIS NAME
 DISPLAYFULLNAME="Confirm that your name is: $FULLNAME"
 
-CONFIRMFULLNAME=$(osascript -e "display dialog \"${DISPLAYFULLNAME}\" buttons {\"Yes\", \"No\"} default button \"No\"")
+CONFIRMFULLNAME=$(osascript -e "display dialog \"${DISPLAYFULLNAME}\" buttons {\"No\", \"Yes\"} default button \"No\"")
 echo $CONFIRMFULLNAME
 if [[ "${CONFIRMFULLNAME}" == "button returned:Yes" ]]; then
 REPEATFULLNAME=false
-
+fi
 fi
 done
 
