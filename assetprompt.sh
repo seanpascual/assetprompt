@@ -9,7 +9,7 @@
 #
 
 # DEPARTMENTS TO BE HIDDEN FROM USER - EDIT AS NECESSARY
-declare -a DEPTSTOREMOVE=('_LOST/STOLEN' '_OUTFORREPAIR' '_SPARE' 'IT' 'Maintenance' 'Meeting Rooms' 'New York office' 'Miami Office')
+declare -a DEPTSTOREMOVE=('_LOST/STOLEN' '_OUTFORREPAIR' '_SPARE' 'IT' 'Maintenance' 'Meeting Rooms' 'New York office' 'Miami Office' '_EXTENDEDLEAVE' '_TESTING')
 
 # LDAP USERS TO BE HIDDEN FROM USER - EDIT AS NECESSARY
 declare -a NAMESTOREMOVE=('ldapadmin')
